@@ -13,6 +13,9 @@ const config: Config = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      height: {
+        screen: ['100vh /* fallback for Opera, IE and etc. */', '100svh'],
+      },
     },
   },
   plugins: [],
