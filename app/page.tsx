@@ -5,7 +5,7 @@ import { Canvas } from '@react-three/fiber'
 
 export default function Home() {
   return (
-    <main className='w-full h-screen'>
+    <main className='w-full h-screen-svh'>
       <Canvas
         className=''
         camera={{
@@ -14,8 +14,8 @@ export default function Home() {
         shadows
       >
         <mesh>
-          <boxGeometry attach='geometry' args={[1, 1, 1]} />
-          <meshStandardMaterial attach='material' color='#6be092' />
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color='#6be092' />
         </mesh>
       </Canvas>
     </main>
