@@ -22,8 +22,8 @@ export default function Home() {
         <Canvas
           camera={{
             fov: 60,
-            // position: [0, 0, 0],
-            position: [0, 0, 1],
+            position: [0, 0, 0],
+            // position: [0, 0, 1],
             rotation: [0, 0, -Math.PI / 32],
           }}
           shadows
@@ -39,10 +39,12 @@ export default function Home() {
 }
 
 function Scene() {
-  const scrollPos = useScrollPosition()
+  const scroll = useScrollPosition()
+  // const delta = useScrollPosition()
   const [scrollSmoothTime, setScrollSmoothTime] = useState(0.4)
   const { camera } = useThree()
   const IMAGE_SIZE = 12
+  let oldDelta = 0
   const images = [
     '/images/1.webp',
     '/images/2.webp',
@@ -77,12 +79,41 @@ function Scene() {
   }, [])
 
   useFrame((state, dt) => {
+    function remap(val, oldMin, oldMax, newMin, newMax) {
+      return newMin + ((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin)
+    }
+
     const group = state.scene.children[0]
-    const r = new THREE.Euler(-Math.PI / 2 - scrollPos, 0, 0)
+    let remappedRot = remap(scroll.delta, 0, 300, 0, Math.PI / 8)
+    const r = new THREE.Euler(
+      -Math.PI / 2 - scroll.scrollPos,
+      // remappedRot,
+      0,
+      // -remappedRot
+      0
+    )
     easing.dampE(group.rotation, r, scrollSmoothTime, dt)
+
+    let fixedDelta = 0
+    if (oldDelta === scroll.delta) {
+      fixedDelta = 0
+    } else {
+      fixedDelta = scroll.delta
+    }
+    oldDelta = scroll.delta
+
+    let remappedVal = remap(fixedDelta, 0, 300, 12, 16)
+    const p = new THREE.Vector3(0, 0, remappedVal)
+    easing.damp3(group.position, p, scrollSmoothTime, dt)
 
     const images = [...group.children]
     images.forEach((image, i) => {
+      // const r2 = new THREE.Euler(
+      //   image.rotation.x,
+      //   image.rotation.y + i,
+      //   image.rotation.z
+      // )
+      // easing.dampE(image.rotation, r2, scrollSmoothTime, dt)
       image.lookAt(new THREE.Vector3(0, 0, 0))
     })
 
@@ -107,7 +138,7 @@ function Scene() {
     //     )
     //   })}
     // </group>
-    <group position={[0, 0, 8]} rotation={[Math.PI / 2, 0, 0]}>
+    <group position={[0, 0, 12]} rotation={[Math.PI / 2, 0, 0]}>
       {images.map((image, i) => {
         return (
           <group position={[...imagePositions[i]]}>

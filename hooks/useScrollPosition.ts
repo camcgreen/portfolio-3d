@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 export const useScrollPosition = () => {
   const [scrollPos, setScrollPos] = useState(0)
+  const [delta, setDelta] = useState(0)
   let scrollPosTmp = 0
 
   useEffect(() => {
@@ -14,6 +15,7 @@ export const useScrollPosition = () => {
       deltaY = window.scrollY - lastKnownScrollPosition
       lastKnownScrollPosition = window.scrollY
       scrollPosTmp -= deltaY / scrollSpeed
+      setDelta(deltaY)
       setScrollPos(scrollPosTmp)
     }
 
@@ -24,5 +26,8 @@ export const useScrollPosition = () => {
     }
   }, [])
 
-  return scrollPos
+  return {
+    scrollPos,
+    delta,
+  }
 }
