@@ -3,46 +3,14 @@
 import { useEffect, useState, useRef } from 'react'
 import NextImage from 'next/image'
 import * as THREE from 'three'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { CameraControls, Image } from '@react-three/drei'
-import { easing } from 'maath'
+import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
+import { CameraControls, Image, MeshPortalMaterial } from '@react-three/drei'
+import { easing, geometry } from 'maath'
 import { useScrollPosition } from '@/hooks/useScrollPosition'
+import { positionsOnEllipse } from '../utils/helpers'
 import Overlay from './components/overlay'
 
-/**
- * Calculate positions for items along the circumference of an ellipse (modified semi-circle).
- *
- * @param {number} radius - The radius of the base semi-circle before modifications.
- * @param {number} itemCount - The total number of items.
- * @returns {Array<[number, number, number]>} An array of [x, y, z] positions for each item.
- */
-function positionsOnEllipse(
-  radius: number,
-  itemCount: number
-): Array<[number, number, number]> {
-  const positions: Array<[number, number, number]> = []
-
-  // The angle between each item (in radians).
-  const deltaTheta = Math.PI / (itemCount - 1)
-
-  for (let i = 0; i < itemCount; i++) {
-    const theta = -Math.PI / 2 + i * deltaTheta
-
-    // Calculate position on a regular semi-circle
-    const baseX = radius * Math.cos(theta)
-    const baseY = radius * Math.sin(theta)
-
-    // Adjust for the squash and stretch
-    // const x = baseX * 1 // Squash width-wise by a factor of 4
-    const x = 0 // Squash width-wise by a factor of 4
-    const y = baseY * 1 // Stretch length-wise by a factor of 4
-    const z = -baseX * 1
-
-    positions.push([x, y, z])
-  }
-
-  return positions
-}
+extend(geometry)
 
 export default function Home() {
   return (
@@ -53,15 +21,17 @@ export default function Home() {
       <div className='fixed left-0 top-0 w-full h-screen'>
         <Canvas
           camera={{
-            fov: 48,
-            // position: [0, -60, 5],
-            position: [0, 0, 0],
-            rotation: [0, 0, 0],
+            fov: 60,
+            // position: [0, 0, 0],
+            position: [0, 0, 2],
+            rotation: [0, 0, -Math.PI / 32],
           }}
           shadows
+          gl={{ antialias: true, toneMapping: THREE.NoToneMapping }}
+          linear
         >
           <Scene />
-          {/* <CameraControls /> */}
+          <CameraControls />
         </Canvas>
       </div>
     </>
@@ -107,36 +77,57 @@ function Scene() {
   }, [])
 
   useFrame((state, dt) => {
-    // console.log(state.scene.children[0])
-    // const p = new THREE.Vector3(0, scrollPos, 5)
-    // easing.damp3(state.camera.position, p, scrollSmoothTime, dt)
-
-    // const p = new THREE.Vector3(0, -scrollPos, 0)
-    // easing.damp3(group.position, r, scrollSmoothTime, dt)
     const group = state.scene.children[0]
-    const r = new THREE.Euler(-Math.PI / 2 - scrollPos, 0, 0)
-    easing.damp3(group.rotation, r, scrollSmoothTime, dt)
-    // easing.damp3(state.camera.position, p, scrollSmoothTime, dt)
+    // const r = new THREE.Euler(-Math.PI / 2 - scrollPos, 0, 0)
+    // easing.dampE(group.rotation, r, scrollSmoothTime, dt)
 
     const images = [...group.children]
     images.forEach((image, i) => {
-      // if (i === 0) console.log(image)
       image.lookAt(new THREE.Vector3(0, 0, 0))
     })
+
+    // const r2 = new THREE.Euler(-Math.PI / 2, Math.PI / 2, Math.PI / 2)
+    // easing.dampE(state.scene.children[0].rotation, r2, scrollSmoothTime, dt)
+    // state.scene.children.rotation.set(new Euler(0, 1, 0))
   })
 
   return (
-    <group rotation={[-Math.PI / 2, 0, 0]}>
-      {images.map((image, i) => {
-        return (
-          <Image
-            url={image}
-            // position={[0, -3 * i, 0]}
-            position={[...imagePositions[i]]}
-            scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
-          />
-        )
-      })}
+    <group>
+      <Frame>
+        <Image
+          url='https://images.unsplash.com/photo-1695931880955-f51fd17a8430?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80'
+          position={[0, 0, -1]}
+          scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
+        />
+      </Frame>
+    </group>
+    // <group position={[0, 0, 8]} rotation={[Math.PI / 2, 0, 0]}>
+    //   {images.map((image, i) => {
+    //     return (
+    //       <group position={[...imagePositions[i]]}>
+    //         <Image
+    //           key={i}
+    //           url={image}
+    //           position={[0, 0, 0]}
+    //           // position={[...imagePositions[i]]}
+    //           scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
+    //         />
+    //       </group>
+    //     )
+    //   })}
+    // </group>
+  )
+}
+
+function Frame({ children, ...props }) {
+  return (
+    <group {...props}>
+      <mesh>
+        <roundedPlaneGeometry args={[1, 1]} />
+        <MeshPortalMaterial side={THREE.DoubleSide}>
+          {children}
+        </MeshPortalMaterial>
+      </mesh>
     </group>
   )
 }

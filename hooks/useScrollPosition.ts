@@ -8,10 +8,12 @@ export const useScrollPosition = () => {
     let lastKnownScrollPosition = 0
     let deltaY = 0
 
+    const scrollSpeed = window.innerWidth < 1100 ? 100 : 700
+
     const handleScroll = () => {
       deltaY = window.scrollY - lastKnownScrollPosition
       lastKnownScrollPosition = window.scrollY
-      scrollPosTmp -= deltaY / 300
+      scrollPosTmp -= deltaY / scrollSpeed
       setScrollPos(scrollPosTmp)
     }
 
