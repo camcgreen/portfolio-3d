@@ -23,7 +23,7 @@ export default function Home() {
           camera={{
             fov: 60,
             // position: [0, 0, 0],
-            position: [0, 0, 2],
+            position: [0, 0, 1],
             rotation: [0, 0, -Math.PI / 32],
           }}
           shadows
@@ -31,7 +31,7 @@ export default function Home() {
           linear
         >
           <Scene />
-          <CameraControls />
+          {/* <CameraControls /> */}
         </Canvas>
       </div>
     </>
@@ -42,7 +42,7 @@ function Scene() {
   const scrollPos = useScrollPosition()
   const [scrollSmoothTime, setScrollSmoothTime] = useState(0.4)
   const { camera } = useThree()
-  const IMAGE_SIZE = 8
+  const IMAGE_SIZE = 12
   const images = [
     '/images/1.webp',
     '/images/2.webp',
@@ -78,8 +78,8 @@ function Scene() {
 
   useFrame((state, dt) => {
     const group = state.scene.children[0]
-    // const r = new THREE.Euler(-Math.PI / 2 - scrollPos, 0, 0)
-    // easing.dampE(group.rotation, r, scrollSmoothTime, dt)
+    const r = new THREE.Euler(-Math.PI / 2 - scrollPos, 0, 0)
+    easing.dampE(group.rotation, r, scrollSmoothTime, dt)
 
     const images = [...group.children]
     images.forEach((image, i) => {
@@ -92,42 +92,48 @@ function Scene() {
   })
 
   return (
-    <group>
-      <Frame>
-        <Image
-          url='https://images.unsplash.com/photo-1695931880955-f51fd17a8430?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80'
-          position={[0, 0, -1]}
-          scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
-        />
-      </Frame>
-    </group>
     // <group position={[0, 0, 8]} rotation={[Math.PI / 2, 0, 0]}>
     //   {images.map((image, i) => {
     //     return (
     //       <group position={[...imagePositions[i]]}>
-    //         <Image
-    //           key={i}
-    //           url={image}
-    //           position={[0, 0, 0]}
-    //           // position={[...imagePositions[i]]}
-    //           scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
-    //         />
+    //         <Frame>
+    //           <Image
+    //             url={image}
+    //             position={[0, 0, -2]}
+    //             scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
+    //           />
+    //         </Frame>
     //       </group>
     //     )
     //   })}
     // </group>
-  )
-}
-
-function Frame({ children, ...props }) {
-  return (
-    <group {...props}>
-      <mesh>
-        <roundedPlaneGeometry args={[1, 1]} />
-        <MeshPortalMaterial side={THREE.DoubleSide}>
-          {children}
-        </MeshPortalMaterial>
-      </mesh>
+    <group position={[0, 0, 8]} rotation={[Math.PI / 2, 0, 0]}>
+      {images.map((image, i) => {
+        return (
+          <group position={[...imagePositions[i]]}>
+            <Image
+              key={i}
+              url={image}
+              position={[0, 0, 0]}
+              // position={[...imagePositions[i]]}
+              scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
+            />
+          </group>
+        )
+      })}
     </group>
   )
 }
+
+// function Frame({ children, ...props }) {
+//   return (
+//     <group {...props}>
+//       <mesh>
+//         <roundedPlaneGeometry args={[9, (9 * 9) / 16]} />
+//         <MeshPortalMaterial side={THREE.DoubleSide}>
+//           {children}
+//         </MeshPortalMaterial>
+//       </mesh>
+//     </group>
+//   )
+// }
