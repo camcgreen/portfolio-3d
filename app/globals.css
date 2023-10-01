@@ -15,3 +15,7 @@
 body {
   /* background-color: rgb(206, 206, 206) */
 }
+
+h2 {
+  opacity: 0;
+}

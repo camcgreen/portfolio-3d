@@ -7,9 +7,6 @@ function Overlay() {
       <h2 className='mb-60'>Project Four</h2>
       <h2 className='mb-60'>Project Five</h2>
       <h2 className='mb-60'>Project Six</h2>
-      <h2 className='mb-60'>Project Seven</h2>
-      <h2 className='mb-60'>Project Eight</h2>
-      <h2 className='mb-60'>Project Nine</h2>
     </div>
   )
 }
