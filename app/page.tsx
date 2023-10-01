@@ -7,6 +7,7 @@ import { Canvas, useFrame, extend } from '@react-three/fiber'
 import { CameraControls, Image, MeshPortalMaterial } from '@react-three/drei'
 import { easing, geometry } from 'maath'
 import { useScrollPosition } from '@/hooks/useScrollPosition'
+import { useMousePosition } from '@/hooks/useMousePosition'
 import Overlay from './components/overlay'
 import gsap from 'gsap'
 
@@ -48,6 +49,7 @@ export default function Portal() {
 
 function Scene() {
   const scroll = useScrollPosition()
+  const mousePos = useMousePosition()
   const [scrollSmoothTime, setScrollSmoothTime] = useState(0.4)
   let oldDelta = 0
 
@@ -70,6 +72,8 @@ function Scene() {
   }, [])
 
   useFrame((state, dt) => {
+    console.log(mousePos)
+
     let fixedDelta = 0
     if (oldDelta === scroll.delta) {
       fixedDelta = 0
@@ -89,8 +93,15 @@ function Scene() {
     )
     easing.damp3(group.scale, squish, scrollSmoothTime, dt)
 
-    const reset = new THREE.Vector3(0, 0, 0)
-    easing.damp3(group.position, reset, scrollSmoothTime, dt)
+    // const reset = new THREE.Vector3(0, 0, 0)
+    // easing.damp3(group.position, reset, scrollSmoothTime, dt)
+
+    const mouseTarget = new THREE.Vector3(
+      mousePos.x / 10000,
+      -mousePos.y / 10000,
+      0
+    )
+    easing.damp3(group.position, mouseTarget, scrollSmoothTime, dt)
 
     const images = [...group.children]
     images.forEach((image, i) => {
