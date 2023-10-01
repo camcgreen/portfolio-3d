@@ -1,6 +1,7 @@
 'use client'
 
 // TRY USING JUST ONE PORTAL AND PUTTING ALL OF THE CARDS BEHIND IT
+// https://codesandbox.io/s/image-portals-parallax-fn5d6c?file=/src/App.js
 
 import { useEffect, useState, useRef } from 'react'
 import NextImage from 'next/image'
@@ -15,8 +16,8 @@ import {
 import { easing, geometry } from 'maath'
 import { dampLookAt } from 'maath/easing'
 import { useScrollPosition } from '@/hooks/useScrollPosition'
-import { positionsOnEllipse } from '../utils/helpers'
-import Overlay from './components/overlay.tsx'
+import { positionsOnEllipse } from '../../utils/helpers'
+import Overlay from '../components/overlay.tsx'
 import gsap from 'gsap'
 
 extend(geometry)
