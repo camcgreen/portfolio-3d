@@ -50,6 +50,7 @@ export default function Portal() {
 function Scene() {
   const scroll = useScrollPosition()
   const mousePos = useMousePosition()
+  const [introAnimFinished, setIntroAnimFinished] = useState(false)
   const [scrollSmoothTime, setScrollSmoothTime] = useState(0.4)
   let oldDelta = 0
 
@@ -59,11 +60,13 @@ function Scene() {
     if (window.innerWidth < 1100) {
       timeout = setTimeout(() => {
         setScrollSmoothTime(0.05)
-      }, 2000)
+        setIntroAnimFinished(true)
+      }, 1000)
     } else {
       timeout = setTimeout(() => {
         setScrollSmoothTime(0.2)
-      }, 2000)
+        setIntroAnimFinished(true)
+      }, 1000)
     }
 
     return () => {
@@ -72,8 +75,6 @@ function Scene() {
   }, [])
 
   useFrame((state, dt) => {
-    console.log(mousePos)
-
     let fixedDelta = 0
     if (oldDelta === scroll.delta) {
       fixedDelta = 0
@@ -85,6 +86,8 @@ function Scene() {
     const p = new THREE.Vector3(state.camera.position.x, scroll.scrollPos, 1)
     easing.damp3(state.camera.position, p, scrollSmoothTime, dt)
 
+    console.log(scroll.delta)
+
     const group = state.scene.children[0]
     const squish = new THREE.Vector3(
       1,
@@ -93,15 +96,17 @@ function Scene() {
     )
     easing.damp3(group.scale, squish, scrollSmoothTime, dt)
 
-    // const reset = new THREE.Vector3(0, 0, 0)
-    // easing.damp3(group.position, reset, scrollSmoothTime, dt)
-
-    const mouseTarget = new THREE.Vector3(
-      mousePos.x / 10000,
-      -mousePos.y / 10000,
-      0
-    )
-    easing.damp3(group.position, mouseTarget, scrollSmoothTime, dt)
+    if (!introAnimFinished) {
+      const reset = new THREE.Vector3(0, 0, 0)
+      easing.damp3(group.position, reset, scrollSmoothTime, dt)
+    } else {
+      const mouseTarget = new THREE.Vector3(
+        mousePos.x / 10000,
+        -mousePos.y / 10000,
+        0
+      )
+      easing.damp3(group.position, mouseTarget, scrollSmoothTime * 2, dt)
+    }
 
     const images = [...group.children]
     images.forEach((image, i) => {
