@@ -4,7 +4,12 @@ import { useEffect, useState, useRef } from 'react'
 import NextImage from 'next/image'
 import * as THREE from 'three'
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
-import { CameraControls, Image, MeshPortalMaterial } from '@react-three/drei'
+import {
+  CameraControls,
+  Image,
+  MeshPortalMaterial,
+  useGLTF,
+} from '@react-three/drei'
 import { easing, geometry } from 'maath'
 import { useScrollPosition } from '@/hooks/useScrollPosition'
 import { positionsOnEllipse } from '../utils/helpers'
@@ -22,9 +27,9 @@ export default function Home() {
         <Canvas
           camera={{
             fov: 60,
-            position: [0, 0, 0],
-            // position: [0, 0, 1],
-            rotation: [0, 0, -Math.PI / 32],
+            // position: [0, 0, 0],
+            position: [0, 0, 10],
+            // rotation: [0, 0, -Math.PI / 32],
           }}
           shadows
           gl={{ antialias: true, toneMapping: THREE.NoToneMapping }}
@@ -43,7 +48,7 @@ function Scene() {
   // const delta = useScrollPosition()
   const [scrollSmoothTime, setScrollSmoothTime] = useState(0.4)
   const { camera } = useThree()
-  const IMAGE_SIZE = 12
+  const IMAGE_SIZE = 13
   let oldDelta = 0
   const images = [
     '/images/1.webp',
@@ -82,18 +87,10 @@ function Scene() {
     function remap(val, oldMin, oldMax, newMin, newMax) {
       return newMin + ((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin)
     }
-
     const group = state.scene.children[0]
     let remappedRot = remap(scroll.delta, 0, 300, 0, Math.PI / 8)
-    const r = new THREE.Euler(
-      -Math.PI / 2 - scroll.scrollPos,
-      // remappedRot,
-      0,
-      // -remappedRot
-      0
-    )
+    const r = new THREE.Euler(-Math.PI / 2 - scroll.scrollPos, 0, 0)
     easing.dampE(group.rotation, r, scrollSmoothTime, dt)
-
     let fixedDelta = 0
     if (oldDelta === scroll.delta) {
       fixedDelta = 0
@@ -101,52 +98,55 @@ function Scene() {
       fixedDelta = scroll.delta
     }
     oldDelta = scroll.delta
-
     let remappedVal = remap(fixedDelta, 0, 300, 12, 16)
     const p = new THREE.Vector3(0, 0, remappedVal)
     easing.damp3(group.position, p, scrollSmoothTime, dt)
-
-    const images = [...group.children]
-    images.forEach((image, i) => {
-      // const r2 = new THREE.Euler(
-      //   image.rotation.x,
-      //   image.rotation.y + i,
-      //   image.rotation.z
-      // )
-      // easing.dampE(image.rotation, r2, scrollSmoothTime, dt)
-      image.lookAt(new THREE.Vector3(0, 0, 0))
+    let images2 = []
+    const children = [...group.children]
+    // console.log(children)
+    children.forEach((child, i) => {
+      images2.push(child.children[1])
     })
-
-    // const r2 = new THREE.Euler(-Math.PI / 2, Math.PI / 2, Math.PI / 2)
-    // easing.dampE(state.scene.children[0].rotation, r2, scrollSmoothTime, dt)
-    // state.scene.children.rotation.set(new Euler(0, 1, 0))
+    // state.scene.children.forEach((child, i) => {
+    //   console.log(child)
+    // })
+    console.log(images2)
+    const images = [...group.children]
+    // images.forEach((image, i) => {
+    images.forEach((image, i) => {
+      image.lookAt(new THREE.Vector3(0, 0, 0))
+      const s = new THREE.Vector3(
+        Math.abs(1 - fixedDelta / 100),
+        1 - Math.abs(fixedDelta / 100),
+        1
+      )
+      easing.damp3(image.scale, s, scrollSmoothTime * 2, dt)
+      const p1 = new THREE.Vector3(
+        imagePositions[i][0] - fixedDelta / 50,
+        imagePositions[i][1] - fixedDelta / 50,
+        imagePositions[i][2] - fixedDelta / 50
+      )
+      easing.damp3(image.position, p1, scrollSmoothTime * 2, dt)
+    })
   })
 
   return (
-    // <group position={[0, 0, 8]} rotation={[Math.PI / 2, 0, 0]}>
-    //   {images.map((image, i) => {
-    //     return (
-    //       <group position={[...imagePositions[i]]}>
-    //         <Frame>
-    //           <Image
-    //             url={image}
-    //             position={[0, 0, -2]}
-    //             scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
-    //           />
-    //         </Frame>
-    //       </group>
-    //     )
-    //   })}
-    // </group>
+    // <Model />
     <group position={[0, 0, 12]} rotation={[Math.PI / 2, 0, 0]}>
       {images.map((image, i) => {
         return (
           <group position={[...imagePositions[i]]}>
+            {/* <mesh>
+              <roundedPlaneGeometry
+                args={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
+              />
+              <meshBasicMaterial color='white ' side={THREE.DoubleSide} />
+            </mesh> */}
+            <Model />
             <Image
               key={i}
               url={image}
-              position={[0, 0, 0]}
-              // position={[...imagePositions[i]]}
+              position={[0, 0, -2]}
               scale={[IMAGE_SIZE, (IMAGE_SIZE * 9) / 16]}
             />
           </group>
@@ -156,15 +156,26 @@ function Scene() {
   )
 }
 
-// function Frame({ children, ...props }) {
-//   return (
-//     <group {...props}>
-//       <mesh>
-//         <roundedPlaneGeometry args={[9, (9 * 9) / 16]} />
-//         <MeshPortalMaterial side={THREE.DoubleSide}>
-//           {children}
-//         </MeshPortalMaterial>
-//       </mesh>
-//     </group>
-//   )
-// }
+function Model(props) {
+  const { nodes, materials } = useGLTF('/models/rounded.glb')
+  return (
+    <group
+      {...props}
+      dispose={null}
+      rotation={[-Math.PI / 2, Math.PI / 2, 0]}
+      position={[0, 0, 1]}
+      scale={[4, 1, 4]}
+    >
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Plane004.geometry}
+        material={materials['Material.002']}
+      >
+        {/* <meshStandardMaterial color='green' /> */}
+      </mesh>
+    </group>
+  )
+}
+
+useGLTF.preload('/models/rounded.glb')

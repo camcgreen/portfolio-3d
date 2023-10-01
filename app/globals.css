@@ -11,3 +11,7 @@
   min-height: 100vh;
   min-height: 100svh;
 }
+
+body {
+  background-color: rgb(206, 206, 206)
+}
