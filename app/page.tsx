@@ -117,7 +117,7 @@ function Cards({ ...props }) {
     <group position={[0, 2, 0]}>
       {images.map((image, i) => {
         return (
-          <group>
+          <group key={i}>
             <mesh position={[0, -i, 0]}>
               {/* @ts-ignore */}
               <roundedPlaneGeometry args={[1, (1 * 9) / 16, 0.1]} />
