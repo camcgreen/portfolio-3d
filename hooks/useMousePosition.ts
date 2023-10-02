@@ -3,11 +3,9 @@ import { useEffect, useRef } from 'react'
 export const useMousePosition = () => {
   const mousePosRef = useRef({ x: 0, y: 0 })
 
-  function getNormalizedCoordinates(width, height) {
-    // Calculate the normalized coordinates of the screen
-    const x = 2 * (width / window.innerWidth) - 1
-    const y = 1 - 2 * (height / window.innerHeight)
-
+  function getNormalizedCoordinates(clientX: number, clientY: number) {
+    const x = 2 * (clientX / window.innerWidth) - 1
+    const y = 1 - 2 * (clientY / window.innerHeight)
     return { x, y }
   }
 
@@ -16,8 +14,6 @@ export const useMousePosition = () => {
     let y: number
 
     const handleMouseMove = (e: MouseEvent) => {
-      // mousePosRef.current.x = e.clientX
-      // mousePosRef.current.y = e.clientY
       const coords = getNormalizedCoordinates(e.clientX, e.clientY)
       mousePosRef.current.x = coords.x
       mousePosRef.current.y = coords.y
