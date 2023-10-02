@@ -10,6 +10,7 @@ import { useScrollPosition } from '@/hooks/useScrollPosition'
 import { useMousePosition } from '@/hooks/useMousePosition'
 import Overlay from './components/overlay'
 import gsap from 'gsap'
+import { clamp } from '../utils/helpers'
 
 extend(geometry)
 
@@ -86,8 +87,6 @@ function Scene() {
     const p = new THREE.Vector3(state.camera.position.x, scroll.scrollPos, 1)
     easing.damp3(state.camera.position, p, scrollSmoothTime, dt)
 
-    console.log(scroll.delta)
-
     const group = state.scene.children[0]
     const squish = new THREE.Vector3(
       1,
@@ -95,6 +94,9 @@ function Scene() {
       1 + Math.abs(fixedDelta / 250)
     )
     easing.damp3(group.scale, squish, scrollSmoothTime, dt)
+
+    // const roundedPlanes = state.scene.children[0]
+    // console.log(roundedPlanes)
 
     if (!introAnimFinished) {
       const reset = new THREE.Vector3(0, 0, 0)
@@ -108,8 +110,8 @@ function Scene() {
       easing.damp3(group.position, mouseTarget, scrollSmoothTime * 2, dt)
     }
 
-    const images = [...group.children]
-    images.forEach((image, i) => {
+    const imageParent = [...group.children]
+    imageParent.forEach((image, i) => {
       const s = new THREE.Vector3(
         Math.abs(1 - fixedDelta / 500),
         1 - Math.abs(fixedDelta / 250),
@@ -122,6 +124,15 @@ function Scene() {
         0 - fixedDelta / 500
       )
       easing.damp3(image.position, p1, scrollSmoothTime * 2, dt)
+
+      const roundedPlane = image.children[0]
+      const scaleY = clamp(1 - Math.abs(fixedDelta / 50), 0.9, 1)
+      const s2 = new THREE.Vector3(scaleY, scaleY, 1)
+      easing.damp3(roundedPlane.scale, s2, scrollSmoothTime, dt)
+
+      const rot = clamp(fixedDelta / 50, -0.15, 0.15)
+      const r = new THREE.Euler(rot, rot, 0)
+      easing.dampE(roundedPlane.rotation, r, scrollSmoothTime * 4, dt)
     })
   })
 
