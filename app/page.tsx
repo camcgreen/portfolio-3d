@@ -23,7 +23,7 @@ const images = [
   '/images/5.webp',
 ]
 
-export default function Portal() {
+export default function Home() {
   return (
     <>
       <main className='relative w-full min-h-screen'>
@@ -102,11 +102,7 @@ function Scene() {
       const reset = new THREE.Vector3(0, 0, 0)
       easing.damp3(group.position, reset, scrollSmoothTime, dt)
     } else {
-      const mouseTarget = new THREE.Vector3(
-        mousePos.x / 10000,
-        -mousePos.y / 10000,
-        0
-      )
+      const mouseTarget = new THREE.Vector3(mousePos.x / 10, mousePos.y / 10, 0)
       easing.damp3(group.position, mouseTarget, scrollSmoothTime * 2, dt)
     }
 

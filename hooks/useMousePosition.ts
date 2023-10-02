@@ -1,24 +1,26 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 export const useMousePosition = () => {
-  // const [mousePosX, setMousePosX] = useState<number>(0)
-  // const [mousePosY, setMousePosY] = useState<number>(0)
-
   const mousePosRef = useRef({ x: 0, y: 0 })
+
+  function getNormalizedCoordinates(width, height) {
+    // Calculate the normalized coordinates of the screen
+    const x = 2 * (width / window.innerWidth) - 1
+    const y = 1 - 2 * (height / window.innerHeight)
+
+    return { x, y }
+  }
 
   useEffect(() => {
     let x: number
     let y: number
 
     const handleMouseMove = (e: MouseEvent) => {
-      // e.preventDefault()
-      // for some reason this changes delta??
-      // x = e.clientX
-      // y = e.clientY
-      // setMousePosX(x)
-      // setMousePosY(y)
-      mousePosRef.current.x = e.clientX
-      mousePosRef.current.y = e.clientY
+      // mousePosRef.current.x = e.clientX
+      // mousePosRef.current.y = e.clientY
+      const coords = getNormalizedCoordinates(e.clientX, e.clientY)
+      mousePosRef.current.x = coords.x
+      mousePosRef.current.y = coords.y
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -27,11 +29,6 @@ export const useMousePosition = () => {
       document.removeEventListener('mousemove', handleMouseMove)
     }
   }, [])
-
-  // return {
-  //   x: mousePosX,
-  //   y: mousePosY,
-  // }
 
   return mousePosRef.current
 }
