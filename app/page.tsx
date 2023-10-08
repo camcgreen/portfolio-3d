@@ -14,7 +14,7 @@ import { clamp } from '../utils/helpers'
 
 extend(geometry)
 
-const IMAGE_SIZE = 3.1
+const IMAGE_SIZE = 4
 const images = [
   '/images/1.webp',
   '/images/2.webp',
@@ -102,8 +102,14 @@ function Scene() {
       const reset = new THREE.Vector3(0, 0, 0)
       easing.damp3(group.position, reset, scrollSmoothTime, dt)
     } else {
-      const mouseTarget = new THREE.Vector3(mousePos.x / 10, mousePos.y / 10, 0)
-      easing.damp3(group.position, mouseTarget, scrollSmoothTime * 2, dt)
+      console.log(fixedDelta)
+      const mouseTarget = new THREE.Vector3(
+        clamp(mousePos.x / 10, -0.03, 0.03),
+        clamp(mousePos.y / 10, -0.03, 0.03),
+        // 0
+        clamp(-Math.abs(fixedDelta / 50), -2.5, 0)
+      )
+      easing.damp3(group.position, mouseTarget, scrollSmoothTime * 4, dt)
     }
 
     const imageParent = [...group.children]
@@ -119,14 +125,14 @@ function Scene() {
         0,
         0 - fixedDelta / 500
       )
-      easing.damp3(image.position, p1, scrollSmoothTime * 2, dt)
+      // easing.damp3(image.position, p1, scrollSmoothTime * 2, dt)
 
       const roundedPlane = image.children[0]
       const scaleY = clamp(1 - Math.abs(fixedDelta / 50), 0.9, 1)
       const s2 = new THREE.Vector3(scaleY, scaleY, 1)
-      easing.damp3(roundedPlane.scale, s2, scrollSmoothTime, dt)
+      easing.damp3(roundedPlane.scale, s2, scrollSmoothTime * 4, dt)
 
-      const rot = clamp(fixedDelta / 50, -0.15, 0.15)
+      const rot = 2 * clamp(fixedDelta / 50, -0.15, 0.15)
       const r = new THREE.Euler(rot, rot, 0)
       easing.dampE(roundedPlane.rotation, r, scrollSmoothTime * 4, dt)
     })
@@ -143,7 +149,7 @@ function Cards({ ...props }) {
           <group key={i}>
             <mesh position={[0, -i, 0]}>
               {/* @ts-ignore */}
-              <roundedPlaneGeometry args={[1, (1 * 9) / 16, 0.1]} />
+              <roundedPlaneGeometry args={[1.5, (1.5 * 9) / 16, 0.1]} />
               <MeshPortalMaterial side={THREE.DoubleSide}>
                 <Image
                   url={image}
