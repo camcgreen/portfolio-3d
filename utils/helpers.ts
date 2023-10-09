@@ -28,3 +28,23 @@ export function positionsOnEllipse(
 // Clamp number between two values with the following line:
 export const clamp = (num: number, min: number, max: number) =>
   Math.min(Math.max(num, min), max)
+
+export const pixelToSceneUnits = (
+  canvasWidth: number,
+  canvasHeight: number,
+  camera: THREE.PerspectiveCamera,
+  z: number
+) => {
+  // Calculate the height of the camera's frustum at distance z
+  const vFov = camera.fov * (Math.PI / 180) // Convert fov to radians
+  const heightAtZ = 2 * Math.tan(vFov / 2) * z
+
+  // Use the aspect ratio to get the width at distance z
+  const widthAtZ = heightAtZ * camera.aspect
+
+  // The width of a single pixel in Three.js units
+  const pixelWidth = widthAtZ / canvasWidth
+  const pixelHeight = heightAtZ / canvasHeight
+
+  return { pixelWidth, pixelHeight }
+}
